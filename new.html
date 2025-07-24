@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LeetCode 100-Day Challenge Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255, 255, 255, 0.1) 10px,
+                rgba(255, 255, 255, 0.1) 20px
+            );
+            animation: slide 20s linear infinite;
+        }
+
+        @keyframes slide {
+            0% { transform: translateX(-50px) translateY(-50px); }
+            100% { transform: translateX(0px) translateY(0px); }
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-section {
+            padding: 30px;
+            background: white;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            transform: translateY(0);
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(79, 172, 254, 0.4);
+        }
+
+        .stat-card.completed {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            box-shadow: 0 10px 20px rgba(86, 171, 47, 0.3);
+        }
+
+        .stat-card.streak {
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .progress-bar-container {
+            background: #f0f0f0;
+            border-radius: 25px;
+            height: 20px;
+            margin: 20px 0;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #56ab2f, #a8e6cf);
+            border-radius: 25px;
+            width: 0%;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .day-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: 2px solid #f0f0f0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .day-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .day-card.completed::before {
+            transform: scaleX(1);
+            background: linear-gradient(90deg, #56ab2f, #a8e6cf);
+        }
+
+        .day-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .day-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .day-progress {
+            background: #e0e0e0;
+            border-radius: 12px;
+            padding: 5px 12px;
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .day-progress.completed {
+            background: #56ab2f;
+            color: white;
+        }
+
+        .problems-list {
+            space-y: 10px;
+        }
+
+        .problem-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .problem-item:hover {
+            background: #e9ecef;
+        }
+
+        .problem-item.completed {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+
+        .problem-info {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+
+        .problem-checkbox {
+            margin-right: 15px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .problem-name {
+            font-weight: 500;
+            color: #333;
+            margin-right: 10px;
+        }
+
+        .difficulty {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .difficulty.easy {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .difficulty.medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .difficulty.hard {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .problem-link {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-left: 10px;
+        }
+
+        .problem-link:hover {
+            text-decoration: underline;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .control-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .reset-btn:hover {
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.6);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .days-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                bottom: 20px;
+                right: 20px;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 LeetCode 100-Day Challenge</h1>
+            <p>Master coding interviews with 5 problems per day</p>
+        </div>
+
+        <div class="progress-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalProblems">0</div>
+                    <div class="stat-label">Total Problems</div>
+                </div>
+                <div class="stat-card completed">
+                    <div class="stat-number" id="completedProblems">0</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+                <div class="stat-card streak">
+                    <div class="stat-number" id="currentStreak">0</div>
+                    <div class="stat-label">Day Streak</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="daysRemaining">20</div>
+                    <div class="stat-label">Days Remaining</div>
+                </div>
+            </div>
+
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div style="text-align: center; margin-top: 10px; font-weight: bold; color: #666;">
+                <span id="progressText">0% Complete</span>
+            </div>
+
+            <div class="days-grid" id="daysContainer">
+                <!-- Days will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="control-btn" onclick="exportProgress()">📊 Export Progress</button>
+        <button class="control-btn reset-btn" onclick="resetProgress()">🔄 Reset All</button>
+    </div>
+
+    <script>
+        const problems = {
+            1: [
+                {name: "Two Sum", difficulty: "Easy", url: "https://leetcode.com/problems/two-sum"},
+                {name: "Merge Two Sorted Lists", difficulty: "Easy", url: "https://leetcode.com/problems/merge-two-sorted-lists"},
+                {name: "Valid Parentheses", difficulty: "Easy", url: "https://leetcode.com/problems/valid-parentheses"},
+                {name: "Add Two Numbers", difficulty: "Medium", url: "https://leetcode.com/problems/add-two-numbers"},
+                {name: "Longest Substring Without Repeating Characters", difficulty: "Medium", url: "https://leetcode.com/problems/longest-substring-without-repeating-characters"}
+            ],
+            2: [
+                {name: "Maximum Subarray", difficulty: "Easy", url: "https://leetcode.com/problems/maximum-subarray"},
+                {name: "LRU Cache", difficulty: "Medium", url: "https://leetcode.com/problems/lru-cache"},
+                {name: "Longest Palindromic Substring", difficulty: "Medium", url: "https://leetcode.com/problems/longest-palindromic-substring"},
+                {name: "3Sum", difficulty: "Medium", url: "https://leetcode.com/problems/3sum"},
+                {name: "Trapping Rain Water", difficulty: "Hard", url: "https://leetcode.com/problems/trapping-rain-water"}
+            ],
+            3: [
+                {name: "Median of Two Sorted Arrays", difficulty: "Hard", url: "https://leetcode.com/problems/median-of-two-sorted-arrays"},
+                {name: "Number of Islands", difficulty: "Medium", url: "https://leetcode.com/problems/number-of-islands"},
+                {name: "Product of Array Except Self", difficulty: "Medium", url: "https://leetcode.com/problems/product-of-array-except-self"},
+                {name: "Merge Intervals", difficulty: "Medium", url: "https://leetcode.com/problems/merge-intervals"},
+                {name: "Merge k Sorted Lists", difficulty: "Hard", url: "https://leetcode.com/problems/merge-k-sorted-lists"}
+            ],
+            4: [
+                {name: "Reverse Linked List", difficulty: "Easy", url: "https://leetcode.com/problems/reverse-linked-list"},
+                {name: "Reorder Data in Log Files", difficulty: "Easy", url: "https://leetcode.com/problems/reorder-data-in-log-files"},
+                {name: "Happy Number", difficulty: "Easy", url: "https://leetcode.com/problems/happy-number"},
+                {name: "Minimum Window Substring", difficulty: "Hard", url: "https://leetcode.com/problems/minimum-window-substring"},
+                {name: "Integer to English Words", difficulty: "Hard", url: "https://leetcode.com/problems/integer-to-english-words"}
+            ],
+            5: [
+                {name: "Remove Invalid Parentheses", difficulty: "Hard", url: "https://leetcode.com/problems/remove-invalid-parentheses"},
+                {name: "Serialize and Deserialize Binary Tree", difficulty: "Hard", url: "https://leetcode.com/problems/serialize-and-deserialize-binary-tree"},
+                {name: "Generate Parentheses", difficulty: "Medium", url: "https://leetcode.com/problems/generate-parentheses"},
+                {name: "Search in Rotated Sorted Array", difficulty: "Medium", url: "https://leetcode.com/problems/search-in-rotated-sorted-array"},
+                {name: "Copy List with Random Pointer", difficulty: "Medium", url: "https://leetcode.com/problems/copy-list-with-random-pointer"}
+            ],
+            6: [
+                {name: "Meeting Rooms II", difficulty: "Medium", url: "https://leetcode.com/problems/meeting-rooms-ii"},
+                {name: "Subarray Sum Equals K", difficulty: "Medium", url: "https://leetcode.com/problems/subarray-sum-equals-k"},
+                {name: "Text Justification", difficulty: "Hard", url: "https://leetcode.com/problems/text-justification"},
+                {name: "Best Time to Buy and Sell Stock", difficulty: "Easy", url: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock"},
+                {name: "Decode String", difficulty: "Medium", url: "https://leetcode.com/problems/decode-string"}
+            ],
+            7: [
+                {name: "Alien Dictionary", difficulty: "Hard", url: "https://leetcode.com/problems/alien-dictionary"},
+                {name: "Palindrome Pairs", difficulty: "Hard", url: "https://leetcode.com/problems/palindrome-pairs"},
+                {name: "Group Anagrams", difficulty: "Medium", url: "https://leetcode.com/problems/group-anagrams"},
+                {name: "Spiral Matrix", difficulty: "Medium", url: "https://leetcode.com/problems/spiral-matrix"},
+                {name: "Container With Most Water", difficulty: "Medium", url: "https://leetcode.com/problems/container-with-most-water"}
+            ],
+            8: [
+                {name: "Find Duplicate File in System", difficulty: "Medium", url: "https://leetcode.com/problems/find-duplicate-file-in-system"},
+                {name: "K Closest Points to Origin", difficulty: "Medium", url: "https://leetcode.com/problems/k-closest-points-to-origin"},
+                {name: "Reconstruct Itinerary", difficulty: "Medium", url: "https://leetcode.com/problems/reconstruct-itinerary"},
+                {name: "Merge Sorted Array", difficulty: "Easy", url: "https://leetcode.com/problems/merge-sorted-array"},
+                {name: "Next Permutation", difficulty: "Medium", url: "https://leetcode.com/problems/next-permutation"}
+            ],
+            9: [
+                {name: "First Missing Positive", difficulty: "Hard", url: "https://leetcode.com/problems/first-missing-positive"},
+                {name: "Insert Delete GetRandom O(1)", difficulty: "Medium", url: "https://leetcode.com/problems/insert-delete-getrandom-o1"},
+                {name: "Letter Combinations of a Phone Number", difficulty: "Medium", url: "https://leetcode.com/problems/letter-combinations-of-a-phone-number"},
+                {name: "Verifying an Alien Dictionary", difficulty: "Easy", url: "https://leetcode.com/problems/verifying-an-alien-dictionary"},
+                {name: "Reverse Integer", difficulty: "Easy", url: "https://leetcode.com/problems/reverse-integer"}
+            ],
+            10: [
+                {name: "Word Search", difficulty: "Medium", url: "https://leetcode.com/problems/word-search"},
+                {name: "Coin Change", difficulty: "Medium", url: "https://leetcode.com/problems/coin-change"},
+                {name: "Maximal Rectangle", difficulty: "Hard", url: "https://leetcode.com/problems/maximal-rectangle"},
+                {name: "Regular Expression Matching", difficulty: "Hard", url: "https://leetcode.com/problems/regular-expression-matching"},
+                {name: "Minimum Time Difference", difficulty: "Medium", url: "https://leetcode.com/problems/minimum-time-difference"}
+            ],
+            11: [
+                {name: "Permutations", difficulty: "Medium", url: "https://leetcode.com/problems/permutations"},
+                {name: "Time Based Key-Value Store", difficulty: "Medium", url: "https://leetcode.com/problems/time-based-key-value-store"},
+                {name: "Decode Ways", difficulty: "Medium", url: "https://leetcode.com/problems/decode-ways"},
+                {name: "Maximal Square", difficulty: "Medium", url: "https://leetcode.com/problems/maximal-square"},
+                {name: "Word Ladder", difficulty: "Medium", url: "https://leetcode.com/problems/word-ladder"}
+            ],
+            12: [
+                {name: "Minimum Cost Tree From Leaf Values", difficulty: "Medium", url: "https://leetcode.com/problems/minimum-cost-tree-from-leaf-values"},
+                {name: "Asteroid Collision", difficulty: "Medium", url: "https://leetcode.com/problems/asteroid-collision"},
+                {name: "Burst Balloons", difficulty: "Hard", url: "https://leetcode.com/problems/burst-balloons"},
+                {name: "UTF-8 Validation", difficulty: "Medium", url: "https://leetcode.com/problems/utf-8-validation"},
+                {name: "Before and After Puzzle", difficulty: "Medium", url: "https://leetcode.com/problems/before-and-after-puzzle"}
+            ],
+            13: [
+                {name: "Cherry Pickup", difficulty: "Hard", url: "https://leetcode.com/problems/cherry-pickup"},
+                {name: "Fraction to Recurring Decimal", difficulty: "Medium", url: "https://leetcode.com/problems/fraction-to-recurring-decimal"},
+                {name: "Design Search Autocomplete System", difficulty: "Hard", url: "https://leetcode.com/problems/design-search-autocomplete-system"},
+                {name: "The Skyline Problem", difficulty: "Hard", url: "https://leetcode.com/problems/the-skyline-problem"},
+                {name: "Binary Tree Maximum Path Sum", difficulty: "Hard", url: "https://leetcode.com/problems/binary-tree-maximum-path-sum"}
+            ],
+            14: [
+                {name: "Longest Valid Parentheses", difficulty: "Hard", url: "https://leetcode.com/problems/longest-valid-parentheses"},
+                {name: "Valid Palindrome", difficulty: "Easy", url: "https://leetcode.com/problems/valid-palindrome"},
+                {name: "Word Break", difficulty: "Medium", url: "https://leetcode.com/problems/word-break"},
+                {name: "Roman to Integer", difficulty: "Easy", url: "https://leetcode.com/problems/roman-to-integer"},
+                {name: "Fizz Buzz", difficulty: "Easy", url: "https://leetcode.com/problems/fizz-buzz"}
+            ],
+            15: [
+                {name: "Friend Circles", difficulty: "Medium", url: "https://leetcode.com/problems/friend-circles"},
+                {name: "Edit Distance", difficulty: "Hard", url: "https://leetcode.com/problems/edit-distance"},
+                {name: "Search a 2D Matrix II", difficulty: "Medium", url: "https://leetcode.com/problems/search-a-2d-matrix-ii"},
+                {name: "Kth Largest Element in an Array", difficulty: "Medium", url: "https://leetcode.com/problems/kth-largest-element-in-an-array"},
+                {name: "Find Median from Data Stream", difficulty: "Hard", url: "https://leetcode.com/problems/find-median-from-data-stream"}
+            ],
+            16: [
+                {name: "Flatten Nested List Iterator", difficulty: "Medium", url: "https://leetcode.com/problems/flatten-nested-list-iterator"},
+                {name: "Task Scheduler", difficulty: "Medium", url: "https://leetcode.com/problems/task-scheduler"},
+                {name: "Employee Free Time", difficulty: "Hard", url: "https://leetcode.com/problems/employee-free-time"},
+                {name: "Binary Tree Right Side View", difficulty: "Medium", url: "https://leetcode.com/problems/binary-tree-right-side-view"},
+                {name: "Jump Game II", difficulty: "Hard", url: "https://leetcode.com/problems/jump-game-ii"}
+            ],
+            17: [
+                {name: "Longest String Chain", difficulty: "Medium", url: "https://leetcode.com/problems/longest-string-chain"},
+                {name: "LFU Cache", difficulty: "Hard", url: "https://leetcode.com/problems/lfu-cache"},
+                {name: "Word Search II", difficulty: "Hard", url: "https://leetcode.com/problems/word-search-ii"},
+                {name: "Split Array Largest Sum", difficulty: "Hard", url: "https://leetcode.com/problems/split-array-largest-sum"},
+                {name: "Basic Calculator II", difficulty: "Hard", url: "https://leetcode.com/problems/basic-calculator-ii"}
+            ],
+            18: [
+                {name: "Nested List Weight Sum II", difficulty: "Medium", url: "https://leetcode.com/problems/nested-list-weight-sum-ii"},
+                {name: "Design Hit Counter", difficulty: "Medium", url: "https://leetcode.com/problems/design-hit-counter"},
+                {name: "Reaching Points", difficulty: "Hard", url: "https://leetcode.com/problems/reaching-points"},
+                {name: "Flatten a Multilevel Doubly Linked List", difficulty: "Medium", url: "https://leetcode.com/problems/flatten-a-multilevel-doubly-linked-list"},
+                {name: "Read N Characters Given Read4 II - Call multiple times", difficulty: "Hard", url: "https://leetcode.com/problems/read-n-characters-given-read4-ii--call-multiple-times"}
+            ],
+            19: [
+                {name: "Swap Nodes in Pairs", difficulty: "Medium", url: "https://leetcode.com/problems/swap-nodes-in-pairs"},
+                {name: "Min Stack", difficulty: "Easy", url: "https://leetcode.com/problems/min-stack"},
+                {name: "Rotate Image", difficulty: "Medium", url: "https://leetcode.com/problems/rotate-image"},
+                {name: "Reverse String", difficulty: "Easy", url: "https://leetcode.com/problems/reverse-string"},
+                {name: "Integer to Roman", difficulty: "Medium", url: "https://leetcode.com/problems/integer-to-roman"}
+            ],
+            20: [
+                {name: "Palindrome Number", difficulty: "Easy", url: "https://leetcode.com/problems/palindrome-number"},
+                {name: "Pour Water", difficulty: "Medium", url: "https://leetcode.com/problems/pour-water"}
+            ]
+        };
+
+        let progress = {};
+        let completedDays = [];
+
+        // Load saved progress
+        function loadProgress() {
+            const saved = {
+                progress: {},
+                completedDays: []
+            };
+            progress = saved.progress;
+            completedDays = saved.completedDays;
+        }
+
+        // Save progress (placeholder since we can't use localStorage)
+        function saveProgress() {
+            // In a real environment, this would save to localStorage
+            console.log('Progress saved:', { progress, completedDays });
+        }
+
+        function initializeTracker() {
+            loadProgress();
+            renderDays();
+            updateStats();
+        }
+
+        function renderDays() {
+            const container = document.getElementById('daysContainer');
+            container.innerHTML = '';
+
+            Object.keys(problems).forEach(day => {
+                const dayNum = parseInt(day);
+                const dayProblems = problems[day];
+                const completedCount = dayProblems.filter(p => progress[`${day}-${p.name}`]).length;
+                const isCompleted = completedCount === dayProblems.length;
+
+                const dayCard = document.createElement('div');
+                dayCard.className = `day-card ${isCompleted ? 'completed' : ''}`;
+                
+                dayCard.innerHTML = `
+                    <div class="day-header">
+                        <div class="day-title">Day ${day}</div>
+                        <div class="day-progress ${isCompleted ? 'completed' : ''}">
+                            ${completedCount}/${dayProblems.length}
+                        </div>
+                    </div>
+                    <div class="problems-list">
+                        ${dayProblems.map((problem, index) => {
+                            const isCompleted = progress[`${day}-${problem.name}`];
+                            return `
+                                <div class="problem-item ${isCompleted ? 'completed' : ''}">
+                                    <div class="problem-info">
+                                        <input type="checkbox" class="problem-checkbox" 
+                                               ${isCompleted ? 'checked' : ''} 
+                                               onchange="toggleProblem('${day}', '${problem.name}')">
+                                        <span class="problem-name">${problem.name}</span>
+                                        <span class="difficulty ${problem.difficulty.toLowerCase()}">${problem.difficulty}</span>
+                                    </div>
+                                    <a href="${problem.url}" target="_blank" class="problem-link">Solve →</a>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+                
+                container.appendChild(dayCard);
+            });
+        }
+
+        function toggleProblem(day, problemName) {
+            const key = `${day}-${problemName}`;
+            progress[key] = !progress[key];
+            
+            // Check if day is completed
+            const dayProblems = problems[day];
+            const completedCount = dayProblems.filter(p => progress[`${day}-${p.name}`]).length;
+            const wasCompleted = completedDays.includes(parseInt(day));
+            const isNowCompleted = completedCount === dayProblems.length;
+            
+            if (isNowCompleted && !wasCompleted) {
+                completedDays.push(parseInt(day));
+            } else if (!isNowCompleted && wasCompleted) {
+                completedDays = completedDays.filter(d => d !== parseInt(day));
+            }
+            
+            saveProgress();
+            renderDays();
+            updateStats();
+        }
+
+        function updateStats() {
+            let totalProblems = 0;
+            let completedProblems = 0;
+            
+            Object.keys(problems).forEach(day => {
+                const dayProblems = problems[day];
+                totalProblems += dayProblems.length;
+                completedProblems += dayProblems.filter(p => progress[`${day}-${p.name}`]).length;
+            });
+            
+            const progressPercentage = totalProblems > 0 ? (completedProblems / totalProblems * 100) : 0;
+            const currentStreak = calculateStreak();
+            const daysRemaining = 20 - completedDays.length;
+            
+            document.getElementById('totalProblems').textContent = totalProblems;
+            document.getElementById('completedProblems').textContent = completedProblems;
+            document.getElementById('currentStreak').textContent = currentStreak;
+            document.getElementById('daysRemaining').textContent = Math.max(0, daysRemaining);
+            
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            progressBar.style.width = progressPercentage + '%';
+            progressText.textContent = Math.round(progressPercentage) + '% Complete';
+        }
+
+        function calculateStreak() {
+            if (completedDays.length === 0) return 0;
+            
+            const sortedDays = [...completedDays].sort((a, b) => a - b);
+            let streak = 1;
+            let maxStreak = 1;
+            
+            for (let i = 1; i < sortedDays.length; i++) {
+                if (sortedDays[i] === sortedDays[i-1] + 1) {
+                    streak++;
+                    maxStreak = Math.max(maxStreak, streak);
+                } else {
+                    streak = 1;
+                }
+            }
+            
+            return maxStreak;
+        }
+
+        function exportProgress() {
+            let totalProblems = 0;
+            let completedProblems = 0;
+            
+            Object.keys(problems).forEach(day => {
+                const dayProblems = problems[day];
+                totalProblems += dayProblems.length;
+                completedProblems += dayProblems.filter(p => progress[`${day}-${p.name}`]).length;
+            });
+            
+            const report = `
+LeetCode 100-Day Challenge Progress Report
+==========================================
+
+📊 Overall Statistics:
+• Total Problems: ${totalProblems}
+• Completed Problems: ${completedProblems}
+• Progress: ${Math.round(completedProblems / totalProblems * 100)}%
+• Days Completed: ${completedDays.length}/20
+• Current Streak: ${calculateStreak()} days
+
+📅 Day-by-Day Breakdown:
+${Object.keys(problems).map(day => {
+    const dayProblems = problems[day];
+    const completed = dayProblems.filter(p => progress[`${day}-${p.name}`]).length;
+    const status = completed === dayProblems.length ? '✅' : '⏳';
+    return `Day ${day}: ${status} ${completed}/${dayProblems.length} problems completed`;
+}).join('\n')}
+
+Generated on: ${new Date().toLocaleDateString()}
+            `;
+            
+            // Create download
+            const blob = new Blob([report], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `leetcode-progress-${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function resetProgress() {
+            if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+                progress = {};
+                completedDays = [];
+                saveProgress();
+                renderDays();
+                updateStats();
+            }
+        }
+
+        // Initialize the tracker when page loads
+        initializeTracker();
+    </script>
+</body>
+</html>
